@@ -2,6 +2,9 @@ import pygame
 import Enemy
 import Player
 import Bullet
+import Constants
+
+c = Constants.Constants()
 
 pygame.init()
 
@@ -21,36 +24,34 @@ bg = pygame.image.load('bg.jpg')
 all_sprites_list = pygame.sprite.Group()
 
 #Set up game elements
-p = Player.Player()
-p.rect.centerx = window_width/2
-p.rect.centery = window_height - 100
+p = Player.Player(window_width/2, window_height - 100)
 all_sprites_list.add(p)
 
 bullets = []
-
 enemies = []
+
 
 def setUpAliens():
     global enemies
-    start = 675
+    x = 750
     y = 25
 
-    for h in range(0,4):
-        line = []    
-        for i in range(0,9):
-            a1 = Enemy.Enemy()
-            a1.rect.x = start
-            a1.rect.y = y
-            line.append(a1)
-            all_sprites_list.add(line[i])
-            start -= 75
-        y += 75
-        start = 675
-        enemies.append(line)
+    for e_counter in range(1,41):
+        enemies.append(Enemy.Enemy(x, y))
+        all_sprites_list.add(enemies[-1])
+        
+        x-=60
+        if e_counter % 10 == 0:
+            x = 750
+            y += 60
 
 def gameLoop():
+    global enemies
     gameExit = False
     counter = 0
+    direction = "left"
+    changeDirection = False
+    moveDown = False
     bullets_cooldown = 15
 
     setUpAliens()
@@ -59,27 +60,49 @@ def gameLoop():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 gameExit = True
+                
 
         #controls
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_a and p.rect.centerx > p.ship_width/2:
                 p.moveLeft()
-            elif event.key == pygame.K_d and p.rect.centerx < window_width - (p.ship_width/2):
+            elif event.key == pygame.K_d and p.rect.centerx < window_width - p.ship_width:
                 p.moveRight()
 
             if event.key == pygame.K_g and bullets_cooldown >= 15:
-                bullets.append(Bullet.Bullet())
-                bullets[-1].rect.centerx = p.rect.centerx
-                bullets[-1].rect.centery = p.rect.centery
-
+                bullets.append(Bullet.Bullet(p.rect.centerx, p.rect.centerx))
                 all_sprites_list.add(bullets[-1])
                 bullets_cooldown = 0
-
-        
-        
+            if event.key == pygame.K_SPACE:
+                p.boost(1.25)
+            
 
         #Game Logic
         b_counter = 0
+
+        if counter%(fps/2) == 0:
+            for e_counter in range(0, len(enemies)):
+                enemies[e_counter].move(direction)
+                if enemies[e_counter].rect.centerx < 50 or enemies[e_counter].rect.centerx > 750:
+                    changeDirection = True
+            
+            
+
+        if changeDirection == True:
+            changeDirection = False
+            if direction == "left":
+                direction = "down-left"
+            elif direction == "down-left":
+                direction = "right"
+            elif direction == "right":
+                direction = "down-right"
+            elif direction == "down-right":
+                direction = "left"
+
+            
+            
+                    
+        
         while len(bullets) > 0 and b_counter < len(bullets):
            
             if bullets[b_counter].rect.centery > 50:
@@ -91,7 +114,10 @@ def gameLoop():
 
             b_counter += 1
 
-
+        counter += 1
+        if len(bullets) > 0:
+            bullets_cooldown += 1
+            
 
         #Draw stuff
         gameDisplay.blit(bg, (bg_x, bg_y))
@@ -102,9 +128,7 @@ def gameLoop():
 
 
         clock.tick(fps)
-        counter += 1
-        if len(bullets) > 0:
-            bullets_cooldown += 1
+        
 
         
 

@@ -29,6 +29,7 @@ all_sprites_list.add(p)
 
 bullets = []
 enemies = []
+enemyMoveCounter = 0
 
 
 def setUpAliens():
@@ -45,8 +46,11 @@ def setUpAliens():
             x = 750
             y += 60
 
+            
+
 def gameLoop():
     global enemies
+    global enemyMoveCounter
     gameExit = False
     counter = 0
     direction = "left"
@@ -64,44 +68,36 @@ def gameLoop():
 
         #controls
         if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_a and p.rect.centerx > p.ship_width/2:
+            if event.key == pygame.K_a and p.rect.left > 0:
                 p.moveLeft()
-            elif event.key == pygame.K_d and p.rect.centerx < window_width - p.ship_width:
+            elif event.key == pygame.K_d and p.rect.right < window_width:
                 p.moveRight()
 
-            if event.key == pygame.K_g and bullets_cooldown >= 15:
-                bullets.append(Bullet.Bullet(p.rect.centerx, p.rect.centerx))
+            if event.key == pygame.K_SPACE and bullets_cooldown >= 15:
+                bullets.append(Bullet.Bullet(p.rect.centerx, p.rect.centery))
                 all_sprites_list.add(bullets[-1])
                 bullets_cooldown = 0
-            if event.key == pygame.K_SPACE:
-                p.boost(1.25)
+
             
 
         #Game Logic
         b_counter = 0
 
         if counter%(fps/2) == 0:
+            enemyMoveCounter += 1
+            if enemyMoveCounter <= 8:
+                direction = "Left"
+            if enemyMoveCounter == 9:
+                direction = "Down"
+            if enemyMoveCounter >= 10 and enemyMoveCounter <= 17:
+                direction = "Right"
+            if enemyMoveCounter == 18:
+                direction = "Down"
+                enemyMoveCounter = 0
+            
             for e_counter in range(0, len(enemies)):
-                enemies[e_counter].move(direction)
-                if enemies[e_counter].rect.centerx < 50 or enemies[e_counter].rect.centerx > 750:
-                    changeDirection = True
+                    enemies[e_counter].move(direction)
             
-            
-
-        if changeDirection == True:
-            changeDirection = False
-            if direction == "left":
-                direction = "down-left"
-            elif direction == "down-left":
-                direction = "right"
-            elif direction == "right":
-                direction = "down-right"
-            elif direction == "down-right":
-                direction = "left"
-
-            
-            
-                    
         
         while len(bullets) > 0 and b_counter < len(bullets):
            
@@ -115,8 +111,8 @@ def gameLoop():
             b_counter += 1
 
         counter += 1
-        if len(bullets) > 0:
-            bullets_cooldown += 1
+        
+        bullets_cooldown += 1
             
 
         #Draw stuff
@@ -125,13 +121,8 @@ def gameLoop():
         
         pygame.display.update()
 
-
-
         clock.tick(fps)
-        
-
-        
-
+    
     
 
 gameLoop()

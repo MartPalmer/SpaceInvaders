@@ -9,11 +9,10 @@ class Bullet(pygame.sprite.Sprite):
         
         self.speed = 10
 
-        self.image = pygame.image.load("b.png").convert()
-        self.image.set_colorkey(WHITE)
-        self.bullet_width = self.image.get_width()
-        #self.image = pygame.transform.scale(self.image, (int(self.ship_width/2), int(self.ship_width/2)))
+        self.image = pygame.image.load("b.png").convert_alpha()
         self.rect = self.image.get_rect()
+        self.rect.centerx = x
+        self.rect.centery = y
             
         
     def moveUp(self):

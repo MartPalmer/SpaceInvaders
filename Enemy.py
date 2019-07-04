@@ -18,12 +18,12 @@ class Enemy(pygame.sprite.Sprite):
 
     def move(self, direction):
            
-        if direction == "left":
+        if direction == "Left":
             self.rect.centerx -= 20
-        elif direction == "right":
+        elif direction == "Right":
             self.rect.centerx += 20
 
-        elif direction == "move-right" or direction == "move-left":
+        elif direction == "Down":
             self.rect.centery += 30
 
         
